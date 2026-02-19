@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useEffect } from 'react'
 
 const AuthContext = createContext(null)
 
+const API_URL = import.meta.env.VITE_API_URL
+
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null)
     const [token, setToken] = useState(localStorage.getItem('token'))
@@ -11,30 +13,33 @@ export function AuthProvider({ children }) {
     useEffect(() => {
         const initAuth = async () => {
             const storedToken = localStorage.getItem('token')
+
             if (storedToken) {
                 try {
-                    const response = await fetch('/api/auth/user', {
+                    const response = await fetch(`${API_URL}/api/auth/user`, {
                         headers: {
                             'x-auth-token': storedToken
                         }
                     })
 
+                    const data = await response.json()
+
                     if (response.ok) {
-                        const userData = await response.json()
-                        setUser(userData)
+                        setUser(data)
                         setToken(storedToken)
                         setIsAuthenticated(true)
                     } else {
-                        // Token is invalid
                         localStorage.removeItem('token')
                         setToken(null)
                     }
+
                 } catch (error) {
                     console.error('Auth initialization error:', error)
                     localStorage.removeItem('token')
                     setToken(null)
                 }
             }
+
             setLoading(false)
         }
 
@@ -42,7 +47,7 @@ export function AuthProvider({ children }) {
     }, [])
 
     const login = async (email, password) => {
-        const response = await fetch('/api/auth/login', {
+        const response = await fetch(`${API_URL}/api/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -65,7 +70,7 @@ export function AuthProvider({ children }) {
     }
 
     const register = async (username, email, password) => {
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch(`${API_URL}/api/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -111,8 +116,10 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
     const context = useContext(AuthContext)
+
     if (!context) {
         throw new Error('useAuth must be used within an AuthProvider')
     }
+
     return context
 }
