@@ -2,8 +2,8 @@ import { createContext, useContext, useState, useEffect } from 'react'
 
 const AuthContext = createContext(null)
 
-// Use relative path for API calls (works with Vite proxy)
-const API_BASE = ''
+// Use /api for Vercel deployment, empty string for local dev with proxy
+const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null)
