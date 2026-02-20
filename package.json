@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "Full-stack Netflix-style movie streaming application",
     "scripts": {
+        "start": "concurrently \"npm run server\" \"npm run client\"",
         "dev": "concurrently \"npm run server\" \"npm run client\"",
         "server": "node server/index.js",
         "client": "npm run dev --prefix client",

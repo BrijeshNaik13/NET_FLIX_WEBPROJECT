@@ -2,7 +2,8 @@ import { createContext, useContext, useState, useEffect } from 'react'
 
 const AuthContext = createContext(null)
 
-const API_URL = import.meta.env.VITE_API_URL
+// Use relative path for API calls (works with Vite proxy)
+const API_BASE = ''
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null)
@@ -16,7 +17,7 @@ export function AuthProvider({ children }) {
 
             if (storedToken) {
                 try {
-                    const response = await fetch(`${API_URL}/api/auth/user`, {
+                    const response = await fetch(`${API_BASE}/api/auth/user`, {
                         headers: {
                             'x-auth-token': storedToken
                         }
@@ -47,7 +48,7 @@ export function AuthProvider({ children }) {
     }, [])
 
     const login = async (email, password) => {
-        const response = await fetch(`${API_URL}/api/auth/login`, {
+        const response = await fetch(`${API_BASE}/api/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -70,7 +71,7 @@ export function AuthProvider({ children }) {
     }
 
     const register = async (username, email, password) => {
-        const response = await fetch(`${API_URL}/api/auth/register`, {
+        const response = await fetch(`${API_BASE}/api/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
