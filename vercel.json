@@ -10,10 +10,7 @@
         },
         {
             "src": "server/index.js",
-            "use": "@vercel/node",
-            "env": {
-                "NODE_ENV": "production"
-            }
+            "use": "@vercel/node"
         }
     ],
     "routes": [
@@ -28,8 +25,5 @@
             "src": "/(.*)",
             "dest": "/client/dist/$1"
         }
-    ],
-    "env": {
-        "NODE_ENV": "production"
-    }
+    ]
 }
