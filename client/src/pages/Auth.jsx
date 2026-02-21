@@ -6,7 +6,7 @@ import { Mail, Lock, User, Eye, EyeOff, Play, ArrowRight, Loader2 } from 'lucide
 export default function Auth() {
     const navigate = useNavigate()
     const location = useLocation()
-    const { login, signup, isAuthenticated, loading: authLoading } = useAuth()
+    const { login, register, isAuthenticated, loading: authLoading } = useAuth()
 
     const [isLogin, setIsLogin] = useState(true)
     const [showPassword, setShowPassword] = useState(false)
@@ -42,10 +42,13 @@ export default function Auth() {
         try {
             if (isLogin) {
                 await login(formData.email, formData.password)
+                navigate('/home')
             } else {
-                await signup(formData.name, formData.email, formData.password)
+                await register(formData.name, formData.email, formData.password)
+                setIsLogin(true)
+                setError('')
+                setFormData({ name: '', email: '', password: '' })
             }
-            navigate('/home')
         } catch (err) {
             setError(err.message || 'An error occurred')
         } finally {
