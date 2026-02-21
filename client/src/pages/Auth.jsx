@@ -68,7 +68,14 @@ export default function Auth() {
                     throw new Error('Passwords do not match')
                 }
 
-                await register(formData.name, formData.email, formData.password)
+                // Make direct API call instead of using AuthContext register (which auto-logs in)
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: formData.name, email: formData.email, password: formData.password })
+                })
+                const data = await response.json()
+                if (!response.ok) throw new Error(data.message || 'Registration failed')
 
                 // Show success message and redirect to login
                 setSuccess('Registration successful. Please login.')
