@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { getMovieDetails } from '../services/api'
 
-function MovieDetails({ movie, onClose }) {
+function MovieDetails({ movie, onClose, onAddToList, onRemoveFromList, isInList }) {
     const [details, setDetails] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    const [listMessage, setListMessage] = useState('')
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -28,8 +29,28 @@ function MovieDetails({ movie, onClose }) {
         }
     }
 
+    const handleAddToList = async () => {
+        if (onAddToList) {
+            const result = await onAddToList()
+            if (result.message) {
+                setListMessage(result.message)
+                setTimeout(() => setListMessage(''), 3000)
+            }
+        }
+    }
+
+    const handleRemoveFromList = async () => {
+        if (onRemoveFromList) {
+            const result = await onRemoveFromList()
+            if (result.message) {
+                setListMessage(result.message)
+                setTimeout(() => setListMessage(''), 3000)
+            }
+        }
+    }
+
     // Default placeholder image
-    const placeholderImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450"%3E%3Crect fill="%23222" width="300" height="450"/%3E%3Ctext fill="%23666" font-family="sans-serif" font-size="16" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E'
+    const placeholderImage = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='450' viewBox='0 0 300 450'%3E%3Crect fill='%23111' width='300' height='450'/%3E%3Ccircle fill='%23333' cx='150' cy='180' r='60'/%3E%3Cpath fill='%23333' d='M120 320 L150 280 L180 320 L180 380 L120 380 Z'/%3E%3Ctext fill='%23555' font-family='Arial' font-size='14' x='150' y='400' text-anchor='middle'%3ENo Poster%3C/text%3E%3C/svg%3E`
 
     return (
         <div
@@ -157,10 +178,25 @@ function MovieDetails({ movie, onClose }) {
                                     </svg>
                                     Play Trailer
                                 </button>
-                                <button className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-md transition-colors">
-                                    Add to List
-                                </button>
+                                {isInList ? (
+                                    <button
+                                        onClick={handleRemoveFromList}
+                                        className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-md transition-colors"
+                                    >
+                                        Remove from List
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={handleAddToList}
+                                        className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-md transition-colors"
+                                    >
+                                        Add to List
+                                    </button>
+                                )}
                             </div>
+                            {listMessage && (
+                                <p className="mt-4 text-center text-green-400">{listMessage}</p>
+                            )}
                         </div>
                     </div>
                 )}

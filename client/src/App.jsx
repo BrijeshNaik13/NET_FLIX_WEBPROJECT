@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
-import Login from './pages/Login'
-import Signup from './pages/Signup'
+import Landing from './pages/Landing'
+import Auth from './pages/Auth'
 import Home from './pages/Home'
 
 // Protected Route Component
@@ -16,7 +16,7 @@ function ProtectedRoute({ children }) {
         )
     }
 
-    return isAuthenticated ? children : <Navigate to="/login" />
+    return isAuthenticated ? children : <Navigate to="/" />
 }
 
 // Public Route Component (redirect if already logged in)
@@ -39,22 +39,27 @@ function App() {
         <AuthProvider>
             <Router>
                 <Routes>
+                    {/* Landing Page - First page users see */}
+                    <Route
+                        path="/"
+                        element={
+                            <PublicRoute>
+                                <Landing />
+                            </PublicRoute>
+                        }
+                    />
+
+                    {/* Auth Page - Login/Signup toggle */}
                     <Route
                         path="/login"
                         element={
                             <PublicRoute>
-                                <Login />
+                                <Auth />
                             </PublicRoute>
                         }
                     />
-                    <Route
-                        path="/signup"
-                        element={
-                            <PublicRoute>
-                                <Signup />
-                            </PublicRoute>
-                        }
-                    />
+
+                    {/* Home Page - Protected */}
                     <Route
                         path="/home"
                         element={
@@ -63,7 +68,9 @@ function App() {
                             </ProtectedRoute>
                         }
                     />
-                    <Route path="/" element={<Navigate to="/home" />} />
+
+                    {/* Fallback redirect */}
+                    <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
             </Router>
         </AuthProvider>

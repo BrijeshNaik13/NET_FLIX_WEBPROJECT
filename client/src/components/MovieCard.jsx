@@ -1,8 +1,15 @@
 function MovieCard({ movie, onClick }) {
-    const { Title, Year, Type, Poster } = movie
+    const { Title, Year, Type, Poster, tmdbPoster } = movie
 
-    // Default placeholder image
-    const placeholderImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450"%3E%3Crect fill="%23222" width="300" height="450"/%3E%3Ctext fill="%23666" font-family="sans-serif" font-size="16" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E'
+    // SVG placeholder
+    const placeholderImage = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='450' viewBox='0 0 300 450'%3E%3Crect fill='%23111' width='300' height='450'/%3E%3Ccircle fill='%23333' cx='150' cy='180' r='60'/%3E%3Cpath fill='%23333' d='M120 320 L150 280 L180 320 L180 380 L120 380 Z'/%3E%3Ctext fill='%23555' font-family='Arial' font-size='14' x='150' y='400' text-anchor='middle'%3ENo Poster%3C/text%3E%3C/svg%3E`
+
+    // Get poster - prefer TMDB poster
+    const posterUrl = tmdbPoster || (Poster && Poster !== 'N/A' ? Poster : null)
+
+    const handleImageError = (e) => {
+        e.target.src = placeholderImage
+    }
 
     return (
         <div
@@ -10,12 +17,13 @@ function MovieCard({ movie, onClick }) {
             onClick={onClick}
         >
             {/* Poster Image */}
-            <div className="aspect-[2/3] relative overflow-hidden">
+            <div className="aspect-[2/3] relative overflow-hidden bg-gray-900">
                 <img
-                    src={Poster !== 'N/A' ? Poster : placeholderImage}
+                    src={posterUrl || placeholderImage}
                     alt={Title}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                     loading="lazy"
+                    onError={handleImageError}
                 />
 
                 {/* Overlay on hover */}
@@ -32,16 +40,16 @@ function MovieCard({ movie, onClick }) {
             </div>
 
             {/* Movie Info */}
-            <div className="p-4">
-                <h3 className="text-white font-semibold text-sm md:text-base truncate group-hover:text-netflix-red transition-colors">
+            <div className="p-3">
+                <h3 className="text-white font-semibold text-sm truncate group-hover:text-netflix-red transition-colors">
                     {Title}
                 </h3>
                 <div className="flex items-center justify-between mt-2">
-                    <span className="text-gray-400 text-xs md:text-sm">
-                        {Year}
+                    <span className="text-gray-400 text-xs">
+                        {Year || 'N/A'}
                     </span>
-                    <span className="px-2 py-1 bg-gray-800 text-gray-300 text-xs rounded capitalize">
-                        {Type}
+                    <span className="px-2 py-0.5 bg-gray-800 text-gray-300 text-xs rounded capitalize">
+                        {Type || 'movie'}
                     </span>
                 </div>
             </div>

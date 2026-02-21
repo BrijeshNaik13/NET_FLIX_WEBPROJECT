@@ -22,6 +22,20 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         minlength: 6
+    },
+    myList: {
+        type: [{
+            imdbID: String,
+            Title: String,
+            Year: String,
+            Type: String,
+            Poster: String,
+            addedAt: {
+                type: Date,
+                default: Date.now
+            }
+        }],
+        default: []
     }
 }, {
     timestamps: true

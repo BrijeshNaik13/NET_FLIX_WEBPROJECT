@@ -2,14 +2,15 @@ import { createContext, useContext, useState, useEffect } from 'react'
 
 const AuthContext = createContext(null)
 
-// Use /api for Vercel deployment, empty string for local dev with proxy
-const API_BASE = import.meta.env.VITE_API_URL || '/api'
+// Use empty string for local dev (Vite proxy), or VITE_API_URL for production
+const API_BASE = ''
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null)
     const [token, setToken] = useState(localStorage.getItem('token'))
     const [loading, setLoading] = useState(true)
     const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const [myList, setMyList] = useState([])
 
     useEffect(() => {
         const initAuth = async () => {
@@ -29,6 +30,10 @@ export function AuthProvider({ children }) {
                         setUser(data)
                         setToken(storedToken)
                         setIsAuthenticated(true)
+                        // Load my list
+                        if (data.myList) {
+                            setMyList(data.myList)
+                        }
                     } else {
                         localStorage.removeItem('token')
                         setToken(null)
@@ -98,6 +103,61 @@ export function AuthProvider({ children }) {
         setToken(null)
         setUser(null)
         setIsAuthenticated(false)
+        setMyList([])
+    }
+
+    // Add movie to my list
+    const addToMyList = async (movie) => {
+        if (!token) return { message: 'Please login first' }
+
+        try {
+            const response = await fetch(`${API_BASE}/api/auth/myList/add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify(movie)
+            })
+
+            const data = await response.json()
+
+            if (response.ok) {
+                setMyList(data.myList)
+            }
+
+            return data
+        } catch (error) {
+            console.error('Add to list error:', error)
+            return { message: 'Error adding to list' }
+        }
+    }
+
+    // Remove movie from my list
+    const removeFromMyList = async (imdbID) => {
+        if (!token) return { message: 'Please login first' }
+
+        try {
+            const response = await fetch(`${API_BASE}/api/auth/myList/remove`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify({ imdbID })
+            })
+
+            const data = await response.json()
+
+            if (response.ok) {
+                setMyList(data.myList)
+            }
+
+            return data
+        } catch (error) {
+            console.error('Remove from list error:', error)
+            return { message: 'Error removing from list' }
+        }
     }
 
     return (
@@ -108,7 +168,10 @@ export function AuthProvider({ children }) {
             loading,
             login,
             register,
-            logout
+            logout,
+            myList,
+            addToMyList,
+            removeFromMyList
         }}>
             {children}
         </AuthContext.Provider>

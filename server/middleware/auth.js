@@ -3,7 +3,16 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'netflix-app-secret-key-2024';
 
 const authMiddleware = (req, res, next) => {
-    const token = req.header('x-auth-token');
+    // Get token from x-auth-token header or Authorization Bearer token
+    let token = req.header('x-auth-token');
+
+    // If no x-auth-token, try Authorization header with Bearer format
+    if (!token) {
+        const authHeader = req.header('Authorization');
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.substring(7);
+        }
+    }
 
     if (!token) {
         return res.status(401).json({ message: 'No token, authorization denied' });
