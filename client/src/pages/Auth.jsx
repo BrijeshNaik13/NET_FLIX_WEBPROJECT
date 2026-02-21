@@ -12,12 +12,14 @@ export default function Auth() {
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    const [success, setSuccess] = useState('')
     const [animated, setAnimated] = useState(false)
 
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        password: ''
+        password: '',
+        confirmPassword: ''
     })
 
     useEffect(() => {
@@ -37,15 +39,46 @@ export default function Auth() {
     const handleSubmit = async (e) => {
         e.preventDefault()
         setError('')
+        setSuccess('')
         setLoading(true)
 
         try {
             if (isLogin) {
+                // Login validation
+                if (!formData.email || !formData.password) {
+                    throw new Error('Please enter all fields')
+                }
                 await login(formData.email, formData.password)
+                navigate('/home')
             } else {
+                // Signup validation
+                if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+                    throw new Error('Please fill in all fields')
+                }
+                if (formData.name.length < 3) {
+                    throw new Error('Name must be at least 3 characters')
+                }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+                    throw new Error('Please enter a valid email address')
+                }
+                if (formData.password.length < 6) {
+                    throw new Error('Password must be at least 6 characters')
+                }
+                if (formData.password !== formData.confirmPassword) {
+                    throw new Error('Passwords do not match')
+                }
+
                 await register(formData.name, formData.email, formData.password)
+
+                // Show success message and redirect to login
+                setSuccess('Registration successful. Please login.')
+                setFormData({ name: '', email: '', password: '', confirmPassword: '' })
+                setTimeout(() => {
+                    setIsLogin(true)
+                    setAnimated(false)
+                    setTimeout(() => setAnimated(true), 150)
+                }, 2000)
             }
-            navigate('/home')
         } catch (err) {
             setError(err.message || 'An error occurred')
         } finally {
@@ -56,6 +89,8 @@ export default function Auth() {
     const toggleMode = () => {
         setAnimated(false)
         setError('')
+        setSuccess('')
+        setFormData({ ...formData, confirmPassword: '' })
         setTimeout(() => {
             setIsLogin(!isLogin)
             setAnimated(true)
@@ -140,10 +175,32 @@ export default function Auth() {
                             </button>
                         </div>
 
+                        {/* Confirm Password Field (Signup only) */}
+                        {!isLogin && (
+                            <div className="group relative">
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-netflix-red transition-colors" />
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    placeholder="Confirm Password"
+                                    value={formData.confirmPassword}
+                                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-400 focus:outline-none focus:border-netflix-red focus:ring-2 focus:ring-netflix-red/20 transition-all duration-300"
+                                    required={!isLogin}
+                                />
+                            </div>
+                        )}
+
                         {/* Error Message */}
                         {error && (
                             <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm text-center">
                                 {error}
+                            </div>
+                        )}
+
+                        {/* Success Message */}
+                        {success && (
+                            <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 text-sm text-center">
+                                {success}
                             </div>
                         )}
 
