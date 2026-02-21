@@ -42,13 +42,10 @@ export default function Auth() {
         try {
             if (isLogin) {
                 await login(formData.email, formData.password)
-                navigate('/home')
             } else {
                 await register(formData.name, formData.email, formData.password)
-                setIsLogin(true)
-                setError('')
-                setFormData({ name: '', email: '', password: '' })
             }
+            navigate('/home')
         } catch (err) {
             setError(err.message || 'An error occurred')
         } finally {
