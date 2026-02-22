@@ -120,8 +120,8 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Routes - Apply DB connection check middleware
-app.use('/api/auth', checkDbConnection, authRoutes);
+// Routes - Auth routes
+app.use('/api/auth', authRoutes);
 
 // Default route - serve frontend
 app.get('/', (req, res) => {
