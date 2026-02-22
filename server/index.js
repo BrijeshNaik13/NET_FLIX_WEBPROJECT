@@ -16,10 +16,11 @@ app.use(cors());
 app.use(express.json());
 
 // Database Connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/netflix-app';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://BrijeshNaik:Brijesh%40123@cluster0.knoqq2o.mongodb.net/?appName=Cluster0';
 
 console.log('Connecting to MongoDB:', MONGODB_URI);
 
+// Connect to MongoDB (with error handling for serverless)
 mongoose.connect(MONGODB_URI)
     .then(() => console.log('MongoDB Connected successfully'))
     .catch(err => console.log('MongoDB Connection Error:', err.message));
@@ -58,17 +59,14 @@ app.get('/', (req, res) => {
     res.json({ message: 'Netflix Movie App API Running' });
 });
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../dist')));
+// For Vercel - serve static files from client/dist
+app.use(express.static(path.join(__dirname, '../client/dist')));
 
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, '../dist/index.html'));
-    });
-}
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Export for Vercel serverless
+module.exports = app;
