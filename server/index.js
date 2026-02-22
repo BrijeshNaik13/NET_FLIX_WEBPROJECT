@@ -18,20 +18,66 @@ app.use(express.json());
 // Database Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://BrijeshNaik:Brijesh%40123@cluster0.knoqq2o.mongodb.net/?appName=Cluster0';
 
+// MongoDB Connection Options
+const mongoOptions = {
+    serverSelectionTimeoutMS: 10000,
+    socketTimeoutMS: 45000,
+    maxPoolSize: 10,
+    minPoolSize: 1,
+    retryWrites: true,
+    retryReads: true
+};
+
+// Configure Mongoose buffering with longer timeout
+mongoose.set('bufferCommands', true);
+mongoose.set('bufferTimeoutMS', 30000);
+
+// Track connection status
+let isDbReady = false;
+
 // Connect to MongoDB with better error handling
 const connectDB = async () => {
     try {
-        await mongoose.connect(MONGODB_URI, {
-            serverSelectionTimeoutMS: 5000,
-            socketTimeoutMS: 45000,
-        });
+        await mongoose.connect(MONGODB_URI, mongoOptions);
+        isDbReady = true;
         console.log('MongoDB Connected successfully');
     } catch (err) {
         console.error('MongoDB Connection Error:', err.message);
+        isDbReady = false;
+        // Retry connection after 5 seconds
+        setTimeout(connectDB, 5000);
     }
 };
 
+// MongoDB Event Listeners
+mongoose.connection.on('connected', () => {
+    isDbReady = true;
+    console.log('MongoDB connection established');
+});
+
+mongoose.connection.on('disconnected', () => {
+    isDbReady = false;
+    console.log('MongoDB connection lost. Attempting to reconnect...');
+    setTimeout(connectDB, 5000);
+});
+
+mongoose.connection.on('error', (err) => {
+    console.error('MongoDB Error:', err.message);
+    isDbReady = false;
+});
+
+// Start connection
 connectDB();
+
+// Middleware to check database connection before processing requests
+const checkDbConnection = (req, res, next) => {
+    if (mongoose.connection.readyState !== 1) {
+        return res.status(503).json({
+            message: 'Database temporarily unavailable. Please try again.'
+        });
+    }
+    next();
+};
 
 // Image proxy route to bypass CORS
 app.get('/api/proxy-image', async (req, res) => {
@@ -59,8 +105,23 @@ app.get('/api/proxy-image', async (req, res) => {
     }
 });
 
-// Routes
-app.use('/api/auth', authRoutes);
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    const dbState = {
+        0: 'disconnected',
+        1: 'connected',
+        2: 'connecting',
+        3: 'disconnecting'
+    };
+    res.json({
+        status: 'ok',
+        database: dbState[mongoose.connection.readyState] || 'unknown',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// Routes - Apply DB connection check middleware
+app.use('/api/auth', checkDbConnection, authRoutes);
 
 // Default route - serve frontend
 app.get('/', (req, res) => {
