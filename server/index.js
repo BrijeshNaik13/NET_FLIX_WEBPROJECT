@@ -54,9 +54,9 @@ app.get('/api/proxy-image', async (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 
-// Default route
+// Default route - serve frontend
 app.get('/', (req, res) => {
-    res.json({ message: 'Netflix Movie App API Running' });
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
 // For Vercel - serve static files from client/dist
