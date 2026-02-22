@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'netflix-app-secret-key-2024';
+const JWT_SECRET = process.env.JWT_SECRET || 'gh7dk9s2@netflix.app.secret';
 
 // Register User
 router.post('/register', async (req, res) => {
@@ -49,8 +49,8 @@ router.post('/register', async (req, res) => {
             }
         });
     } catch (err) {
-        console.error('Register Error:', err.message);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Register Error:', err);
+        res.status(500).json({ message: 'Server error: ' + err.message });
     }
 });
 

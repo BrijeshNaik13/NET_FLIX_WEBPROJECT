@@ -18,12 +18,20 @@ app.use(express.json());
 // Database Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://BrijeshNaik:Brijesh%40123@cluster0.knoqq2o.mongodb.net/?appName=Cluster0';
 
-console.log('Connecting to MongoDB:', MONGODB_URI);
+// Connect to MongoDB with better error handling
+const connectDB = async () => {
+    try {
+        await mongoose.connect(MONGODB_URI, {
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+        });
+        console.log('MongoDB Connected successfully');
+    } catch (err) {
+        console.error('MongoDB Connection Error:', err.message);
+    }
+};
 
-// Connect to MongoDB (with error handling for serverless)
-mongoose.connect(MONGODB_URI)
-    .then(() => console.log('MongoDB Connected successfully'))
-    .catch(err => console.log('MongoDB Connection Error:', err.message));
+connectDB();
 
 // Image proxy route to bypass CORS
 app.get('/api/proxy-image', async (req, res) => {

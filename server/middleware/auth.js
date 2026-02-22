@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'netflix-app-secret-key-2024';
+const JWT_SECRET = process.env.JWT_SECRET || 'gh7dk9s2@netflix.app.secret';
 
 const authMiddleware = (req, res, next) => {
     // Get token from x-auth-token header or Authorization Bearer token
