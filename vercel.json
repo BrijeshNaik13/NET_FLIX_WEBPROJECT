@@ -2,33 +2,34 @@
     "version": 2,
     "builds": [
         {
-            "src": "client/package.json",
+            "src": "client",
             "use": "@vercel/static-build",
             "config": {
-                "outputDirectory": "client/dist"
+                "buildCommand": "npm run build",
+                "outputDirectory": "dist"
             }
+        },
+        {
+            "src": "api/**/*.js",
+            "use": "@vercel/node"
         }
     ],
-    "rewrites": [
+    "routes": [
         {
-            "source": "/api/auth/register",
-            "destination": "/api/auth/register.js"
+            "src": "/api/auth/register",
+            "dest": "/api/auth/register.js"
         },
         {
-            "source": "/api/auth/login",
-            "destination": "/api/auth/login.js"
+            "src": "/api/auth/login",
+            "dest": "/api/auth/login.js"
         },
         {
-            "source": "/api/auth/user",
-            "destination": "/api/auth/user.js"
+            "src": "/api/auth/user",
+            "dest": "/api/auth/user.js"
         },
         {
-            "source": "/api/(.*)",
-            "destination": "/server/index.js"
-        },
-        {
-            "source": "/(.*)",
-            "destination": "/client/dist/index.html"
+            "src": "/(.*)",
+            "dest": "/client/dist/$1"
         }
     ]
 }
